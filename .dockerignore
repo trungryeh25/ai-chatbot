@@ -1,0 +1,12 @@
+.idea/
+logs/*
+!logs/.keep
+*.pyc
+venv/
+env/
+.DS_Store
+model_files/
+frontend/
+cbot/
+__pycache__/
+notes.txt
