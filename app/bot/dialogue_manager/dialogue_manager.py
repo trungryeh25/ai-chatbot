@@ -20,10 +20,11 @@ from app.bot.dialogue_manager.models import (
     ParameterModel,
     UserMessage,
 )
-from app.bot.dialogue_manager.http_client import call_api, APICallExcetion
+from app.bot.dialogue_manager.http_client import HttpClient, APICallException
 
 from app.config import app_config
 from app.database import client
+from aiohttp import ClientSession
 
 logger = logging.getLogger("dialogue_manager")
 
@@ -45,6 +46,7 @@ class DialogueManager:
         nlu_pipeline: NLUPipeline,
         fallback_intent_id: str,
         intent_confidence_threshold: float,
+        http_client: HttpClient,
     ):
         self.memory_saver = memory_saver
         self.nlu_pipeline = nlu_pipeline
@@ -53,6 +55,7 @@ class DialogueManager:
         }  # Map for faster lookup
         self.fallback_intent_id = fallback_intent_id
         self.confidence_threshold = intent_confidence_threshold
+        self.http_client = http_client
 
     @classmethod
     async def from_config(cls):
@@ -69,6 +72,8 @@ class DialogueManager:
 
         bot = await get_bot("default")
         confidence_threshold = bot.nlu_config.traditional_settings.intent_detection_threshold
+        session = ClientSession()
+        http_client = HttpClient(session)
 
         memory_saver = MemorySaverMongo(client)
 
@@ -78,6 +83,7 @@ class DialogueManager:
             nlu_pipeline=cls._cached_nlu_pipeline,
             fallback_intent_id=app_config.DEFAULT_FALLBACK_INTENT_NAME,
             intent_confidence_threshold=confidence_threshold,
+            http_client=http_client,
         )
         
     async def update_model(self, models_dir):
@@ -96,11 +102,6 @@ class DialogueManager:
         self.intents = {intent.intent_id: intent for intent in self.__class__._cached_intents}
         logger.info("NLU pipeline and intents updated successfully")
         
-        # Load models
-        # ok = self.nlu_pipeline.load(models_dir)
-        # if not ok:
-        #     self.nlu_pipeline = None
-        # logger.info("NLU Pipeline models updated")
 
     async def process(self, message: UserMessage) -> State:
         """
@@ -337,13 +338,13 @@ class DialogueManager:
             parameters = current_state.extracted_parameters
 
         try:
-            return await call_api(
-                rendered_url,
-                api_details.request_type,
-                headers,
-                parameters,
-                api_details.is_json,
+            return await self.http_client.request(
+                url=rendered_url,
+                method=api_details.request_type,
+                headers=headers,
+                parameters=parameters,
+                is_json=api_details.is_json,
             )
-        except APICallExcetion as e:
+        except APICallException as e:
             logger.warning(f"API call failed: {e}")
             raise DialogueManagerException("API call failed")

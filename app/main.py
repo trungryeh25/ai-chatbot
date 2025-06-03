@@ -7,7 +7,7 @@ from aiohttp import ClientSession
 
 from app.database import client as database_client
 from app.dependencies import init_dialogue_manager
-from app.bot.dialogue_manager.http_client import HTTPClient
+from app.bot.dialogue_manager.http_client import HttpClient
 from app.bot.memory.memory_saver_mongo import MemorySaverMongo
 
 # Admin routers
@@ -29,7 +29,7 @@ async def lifespan(app: FastAPI):
     # Init reusable HTTP session
     session = ClientSession()
     app.state.http_session = session
-    app.state.http_client = HTTPClient(session)
+    app.state.http_client = HttpClient(session)
 
     # Optionally ensure MongoDB indexes (recommended)
     state_collection = database_client.get_database("chatbot").get_collection("state")

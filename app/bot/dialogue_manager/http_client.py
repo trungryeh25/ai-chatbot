@@ -58,3 +58,8 @@ class HttpClient:
         except Exception as e:
             logger.exception(f"Unexpected error: {str(e)}")
             raise
+        
+    # async def close(self):
+    #     if not self.session.closed:
+    #         await self.session.close()
+    #         logger.debug("[HttpClient] Session closed")
