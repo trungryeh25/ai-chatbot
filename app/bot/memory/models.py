@@ -46,20 +46,24 @@ class State:
             "current_node": self.current_node,
             "date": self.date,
         }
-
+        
     @classmethod
     def from_dict(cls, state_dict: Dict) -> "State":
         # parse all the fields
         return cls(
-            thread_id=state_dict["thread_id"],
-            context=state_dict["context"],
-            intent=state_dict["intent"],
-            parameters=state_dict["parameters"],
-            extracted_parameters=state_dict["extracted_parameters"],
-            missing_parameters=state_dict["missing_parameters"],
-            complete=state_dict["complete"],
-            current_node=state_dict["current_node"],
+            thread_id=state_dict.get("thread_id"),
+            user_message=UserMessage.from_dict(state_dict["user_message"]) if state_dict.get("user_message") else None,
+            bot_message=state_dict.get("bot_message"),
+            context=state_dict.get("context"),
+            intent=state_dict.get("intent"),
+            parameters=state_dict.get("parameters"),
+            extracted_parameters=state_dict.get("extracted_parameters"),
+            missing_parameters=state_dict.get("missing_parameters"),
+            complete=state_dict.get("complete", False),
+            current_node=state_dict.get("current_node", ""),
+            date=state_dict.get("date", datetime.now(UTC)),
         )
+
 
     def update(self, user_message: UserMessage):
         self.user_message = user_message

@@ -1,86 +1,60 @@
 import logging
-import aiohttp
-import asyncio
 from typing import Dict, Any, Optional
-from aiohttp import ClientTimeout
+from aiohttp import ClientSession, ClientTimeout, ClientError
+import asyncio
 
 logger = logging.getLogger("http_client")
 
-
-class APICallExcetion(Exception):
+class APICallException(Exception):
     pass
 
 
-async def call_api(
-    url: str,
-    method: str,
-    headers: Optional[Dict[str, str]] = None,
-    parameters: Optional[Dict[str, Any]] = None,
-    is_json: bool = False,
-    timeout: int = 30,
-) -> Dict[str, Any]:
-    """
-    Asynchronously call external API with improved error handling and timeout management
+class HttpClient:
+    def __init__(self, session: ClientSession):
+        self.session = session
 
-    Args:
-        url: The API endpoint URL
-        method: HTTP method (GET, POST, PUT, DELETE)
-        headers: Optional request headers
-        parameters: Optional request parameters or body
-        is_json: Whether to send parameters as JSON body
-        timeout: Request timeout in seconds
+    async def request(
+        self,
+        url: str,
+        method: str,
+        headers: Optional[Dict[str, str]] = None,
+        parameters: Optional[Dict[str, Any]] = None,
+        is_json: bool = False,
+        timeout: int = 30,
+    ) -> Dict[str, Any]:
+        headers = headers or {}
+        parameters = parameters or {}
+        timeout_cfg = ClientTimeout(total=timeout)
+        method = method.upper()
 
-    Returns:
-        Dict containing the API response
-
-    Raises:
-        aiohttp.ClientError: For HTTP-specific errors
-        asyncio.TimeoutError: When request times out
-        ValueError: For invalid method types
-        Exception: For other unexpected errors
-    """
-    headers = headers or {}
-    parameters = parameters or {}
-    timeout_config = ClientTimeout(total=timeout)
-
-    try:
-        async with aiohttp.ClientSession(timeout=timeout_config) as session:
-            method = method.upper()
+        try:
             logger.debug(
-                f"Initiating async API Call: url={url} \
-                    method={method} payload={parameters}"
+                f"[HttpClient] Calling {method} {url} "
+                f"headers={headers} payload={parameters}"
             )
 
-            if method == "GET":
-                async with session.get(
-                    url, headers=headers, params=parameters
-                ) as response:
-                    result = await response.json()
-            elif method in ["POST", "PUT"]:
-                kwargs = {
-                    "headers": headers,
-                    "json" if is_json else "params": parameters,
-                }
-                async with getattr(session, method.lower())(url, **kwargs) as response:
-                    result = await response.json()
-            elif method == "DELETE":
-                async with session.delete(
-                    url, headers=headers, params=parameters
-                ) as response:
-                    result = await response.json()
+            kwargs = {
+                "headers": headers,
+                "timeout": timeout_cfg
+            }
+
+            if method in ["POST", "PUT"]:
+                kwargs["json" if is_json else "params"] = parameters
+            elif method in ["GET", "DELETE"]:
+                kwargs["params"] = parameters
             else:
-                raise ValueError(f"Unsupported request method: {method}")
+                raise ValueError(f"Unsupported HTTP method: {method}")
 
-            response.raise_for_status()
-            logger.debug(f"API response => {result}")
-            return result
+            async with getattr(self.session, method.lower())(url, **kwargs) as response:
+                response.raise_for_status()
+                return await response.json()
 
-    except aiohttp.ClientError as e:
-        logger.error(f"HTTP error occurred: {str(e)}")
-        raise APICallExcetion(f"HTTP error occurred: {str(e)}")
-    except asyncio.TimeoutError:
-        logger.error(f"Request timed out after {timeout} seconds")
-        raise APICallExcetion(f"Request timed out after {timeout} seconds")
-    except Exception as e:
-        logger.error(f"Unexpected error during API call: {str(e)}")
-        raise
+        except ClientError as e:
+            logger.error(f"HTTP error: {str(e)}")
+            raise APICallException(f"HTTP error: {str(e)}")
+        except asyncio.TimeoutError:
+            logger.error(f"Timeout after {timeout} seconds")
+            raise APICallException(f"Timeout after {timeout} seconds")
+        except Exception as e:
+            logger.exception(f"Unexpected error: {str(e)}")
+            raise

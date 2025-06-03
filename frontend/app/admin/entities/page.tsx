@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { getEntities, createEntity, deleteEntity } from '../../services/entities';
 import { EntityModel } from '@/app/services/training';
 import { useSnackbar } from '../../components/Snackbar/SnackbarContext';
-import '/style.css';
 
 const EntitiesPage: React.FC = () => {
   const [entities, setEntities] = useState<EntityModel[]>([]);
