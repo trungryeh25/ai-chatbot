@@ -71,6 +71,7 @@ class DialogueManager:
             cls._cached_nlu_pipeline = await get_pipeline()
 
         bot = await get_bot("default")
+        fallback_intent_id=app_config.DEFAULT_FALLBACK_INTENT_NAME
         confidence_threshold = bot.nlu_config.traditional_settings.intent_detection_threshold
         session = ClientSession()
         http_client = HttpClient(session)
@@ -81,7 +82,7 @@ class DialogueManager:
             memory_saver=memory_saver,
             intents=cls._cached_intents,
             nlu_pipeline=cls._cached_nlu_pipeline,
-            fallback_intent_id=app_config.DEFAULT_FALLBACK_INTENT_NAME,
+            fallback_intent_id=fallback_intent_id,
             intent_confidence_threshold=confidence_threshold,
             http_client=http_client,
         )

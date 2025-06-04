@@ -13,7 +13,8 @@ class CRFEntityExtractor(NLUComponent):
     Performs NER (Named Entities Recognition) training, prediction, model import/export
     """
 
-    def __init__(self):
+    def __init__(self, model_path: str = None):
+        self.model_path = model_path
         self.tagger = None
 
     def extract_features(self, sent, i):
@@ -160,6 +161,10 @@ class CRFEntityExtractor(NLUComponent):
         :param message:
         :return:
         """
+        if self.tagger is None:
+            if not self.model_path:
+                raise ValueError("Model path must be provided to load CRF model.")
+            self.load(self.model_path)
         spacy_doc = message.get("spacy_doc")
         tagged_token = self.pos_tagger(spacy_doc)
         words = [token.text for token in spacy_doc]
