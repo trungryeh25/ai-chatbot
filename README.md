@@ -3,6 +3,8 @@
 
 AI Chatbot is a Python-based platform for building your own chatbot. It allows you to design natural language conversations effortlessly through an intuitive UI—no coding skills or AI expertise required. Create and train intelligent chatbots quickly and easily.
 
+![](/docs/screenshots/admin_chat.png)
+
 ## Feature
 * Fully Self-Hosted
 * Low-Code, DIY Admin Dashboard for Bot Development
