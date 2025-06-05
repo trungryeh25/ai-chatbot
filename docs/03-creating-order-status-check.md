@@ -6,7 +6,7 @@ For a quick start, you can find a pre-configured bot in the examples folder. Imp
 ## Configuration
 ### 1. Create Order Number Entity
 1. Go to the Entities section
-2. Create a new entity named "order_number"
+2. Create a new entity named "order_number" and "price".
 
 ![](/docs/screenshots/entities_configuration.png)
 
@@ -14,8 +14,8 @@ For a quick start, you can find a pre-configured bot in the examples folder. Imp
 1. Navigate to the Intents section in the admin interface
 2. Click "Create Intent"
 3. Configure the basic intent information:
-    - Intent Name: "Check Order Status"
-    - Intent ID: "check_order_status"
+    - Intent Name: "Check Order Price"
+    - Intent ID: "check_order_price"
 
 #### Configure Parameters
 
@@ -27,8 +27,8 @@ Add the following parameter:
     - Prompt: "Please provide your order number"
 
 - para 2 
-    - Name: "order_number"
-    - Type: Select your order number entity type
+    - Name: "price"
+    - Type: Select your price entity type
 
 ### 3. Set Up API Integration 
 Configuration steps:
@@ -46,7 +46,9 @@ In the response section of the intent, customize the response using the API resu
 
 ```
 Your order status is {{ result['status'] }}
--------------------------or--------------------------------
+```
+and
+```
 The total cost of the order is ${{ result['total_price'] }}
 ```
 
