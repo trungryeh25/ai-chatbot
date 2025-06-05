@@ -32,6 +32,8 @@ AI Chatbot is a Python-based platform for building your own chatbot. It allows y
 
 ## Documentation
 
+Check out our [documentation](/docs/README.md) to get started.
+
 ## References
 The project references the GitHub repository of [Alfred Francis](https://github.com/alfredfrancis). This is an open-source [GitHub repo](https://github.com/alfredfrancis/ai-chatbot-framework/tree/master?tab=readme-ov-file#documentation) that serves as a resource for both studying and hands-on learning about AI Chatbots and Large Language Models (LLMs).
 
