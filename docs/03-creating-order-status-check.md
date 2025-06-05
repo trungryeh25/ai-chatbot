@@ -43,11 +43,6 @@ https://fake-store-api.mock.beeceptor.com/api/orders/status?order_id={{ paramete
 
 ### 4. Configure Response Template
 In the response section of the intent, customize the response using the API result:
-
-```
-Your order status is {{ result['status'] }}
-```
-and
 ```
 The total cost of the order is ${{ result['total_price'] }}
 ```
